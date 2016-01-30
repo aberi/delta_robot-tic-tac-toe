@@ -31,8 +31,13 @@ def test_fork(b, letter):
     board.fork(b, letter) 
 
 if __name__ == "__main__":
-    b = [[0, 1, 0], [1, 0, 0], [0, 0, 0]]
+    b = [[0, 1, 2], [1, 0, 0], [0, 0, 2]]
 
     print "\nTesting with " + str(b) 
-
-    test_fork(b, "X") 
+    board.print_board(b)
+    board.fork(b, "X") 
+    board.block(b, "O")
+    board.win(b, "X")
+    board.fork(b, "X")
+    board.block(b, "O")
+    board.win(b, "X")
