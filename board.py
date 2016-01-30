@@ -5,6 +5,19 @@ import copy
 
 spaces = {"blank": 0, "X": 1, "O": 2}
 
+def same_col((x1, y1), (x2, y2)):
+    return x1 == x2
+    
+def same_row((x1, y1), (x2, y2)):
+    return y1 == y2
+
+def same_diag((x1, y1), (x2, y2)):
+    return abs(x1 - x2) == abs(y1 - y2)
+
+def in_line((x1, y1), (x2, y2)):
+    return same_col((x1, y1), (x2, y2)) or same_row((x1, y1), (x2, y2)) or same_diag((x1, y1), (x2, y2))
+
+
 def opponent(letter):
     if letter == "X":
         return "O"
@@ -44,7 +57,7 @@ def all_two_rows(b, letter):
                 # This is WRONG !!!
                 for i1 in range(i - 2, i + 3):
                     for j1 in range(j - 2, j + 3):
-                        if (i1 != i or j1 != j) and inbounds(i1, j1, 3, 3) and b[i1][j1] == letter:
+                        if in_line((i, j), (i1, j1)) and (i1 != i or j1 != j) and inbounds(i1, j1, 3, 3) and b[i1][j1] == letter:
                             coord = [(i1, j1), (i, j)]
                             coord.sort()
                             if coord not in a:
@@ -140,11 +153,12 @@ def block(b, letter):
     return False
 
 def copy_board(b):
-    new_b = [[0] * 3] * 3
+    new_b = [[0,0,0],[0,0,0],[0,0,0]]
+    print new_b
     for i in range(0, 3):
         for j in range(0, 3):
             new_b[i][j] = b[i][j]
-        
+
     return new_b
 
 def fork(b, letter):
@@ -155,6 +169,7 @@ def fork(b, letter):
             if b[i][j] == spaces["blank"]:
                 b_copy = copy_board(b)
                 b_copy[i][j] = spaces[letter]
+                print b_copy
                 new_num_twos = num_two_rows(b_copy, letter)
                 diff_num_twos = new_num_twos - prev_num_twos 
                 print "Created " + str(diff_num_twos) + " by placing " + letter + " at " + str((i, j))
@@ -162,10 +177,8 @@ def fork(b, letter):
                 if diff_num_twos >= 2:
                     print "FORK!!!!!!!!!!!!!!!!!!!!!!"
                     
-    #                b[i][j] = spaces[letter]
-    #                return True
+                    b[i][j] = spaces[letter]
+                    return True
     
     return False
                  
-
- 

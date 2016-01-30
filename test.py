@@ -31,21 +31,7 @@ def test_fork(b, letter):
     board.fork(b, letter) 
 
 if __name__ == "__main__":
-    b = [[2, 0, 2], [0, 0, 0], [0, 0, 1]]
-
-    print "\nTesting with " + str(b) 
-
-    # test_two_row(b)
-    test_third_space(b, "O")
-    test_all_winning_moves(b, "O")
-
     b = [[0, 1, 0], [1, 0, 0], [0, 0, 0]]
-
-    print "\nTesting with " + str(b) 
-
-    test_fork(b, "X") 
-
-    b = [[0, 1, 0], [1, 2, 0], [0, 0, 0]]
 
     print "\nTesting with " + str(b) 
 
