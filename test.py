@@ -88,12 +88,16 @@ def run():
     args = vars(ap.parse_args())
     
     print "Board that was input: " + str(args["board"])
-    (b, letter) = board.string_to_board(str(args["board"]))
-     
+
     ser = serial.Serial('/dev/cu.usbmodemFD121', 9600)
     time.sleep(1)
-
-    play(b, letter, ser) 
+    
+    if args["board"] == "blank":
+        ser.write(chr(10))       
+    else: 
+        (b, letter) = board.string_to_board(str(args["board"]))
+     
+        play(b, letter, ser) 
 
 if __name__ == "__main__":
     status = run()
