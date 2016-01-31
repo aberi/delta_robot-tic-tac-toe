@@ -275,7 +275,7 @@ def block_fork(b, letter, debug=True):
                             last_space[0] = i * 3 + j
                             print "Last space played at " + str(last_space[0])
                             if debug:
-                                print letter + " plays at " + str((i, j)) + " (Block Fork)"
+                                print letter + " plays at " + str((i, j)) + " (Block Fork 1)"
                                 print_board(b)
                             return (i, j)
                     
@@ -284,6 +284,9 @@ def block_fork(b, letter, debug=True):
     space = fork(b_copy, opponent(letter), False) 
     if space != None: 
         b[space[0]][space[1]] = letter
+        if debug:
+            print letter + " plays at " + str((i, j)) + " (Block Fork 2)"
+            print_board(b)
         last_space[0] = space[0] * 3 + space[1]
    
     return space 
