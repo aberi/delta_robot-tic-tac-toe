@@ -30,14 +30,31 @@ def test_all_winning_moves(b, letter):
 def test_fork(b, letter):
     board.fork(b, letter) 
 
-if __name__ == "__main__":
-    b = [[0, 1, 2], [1, 0, 0], [0, 0, 2]]
+def full_board(b):
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if b[i][j] == 0:
+                return False 
+        
+    return True
 
-    print "\nTesting with " + str(b) 
+def play_boards(boards, letters):
+    for i in range(0, len(boards)):
+        play(boards[i], letters[i])
+
+def play(b, letter):
     board.print_board(b)
-    board.fork(b, "X") 
-    board.block(b, "O")
-    board.win(b, "X")
-    board.fork(b, "X")
-    board.block(b, "O")
-    board.win(b, "X")
+    play = board.move(b, letter)
+    while play != 0 and not full_board(b):
+        letter = board.opponent(letter)
+        play = board.move(b, letter)
+    
+    if play != 0:
+        print "Ends in a draw"
+    
+
+if __name__ == "__main__":
+    boards = [[[0, 0, 1], [0, 2, 0], [1, 0, 0]], [[1, 1, 2], [0, 2, 0], [0,  0, 0]], [[1, 2, 1],[0, 0, 0], [2, 0, 0]]]
+    letters = ["O", "X", "X"]
+    
+    play_boards(boards, letters)

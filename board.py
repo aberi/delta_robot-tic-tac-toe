@@ -5,14 +5,25 @@ import copy
 
 spaces = {"blank": 0, "X": 1, "O": 2}
 
+def empty_board(b):
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if b[i][j] != 0:
+                return False 
+    
+    return True
+
 def same_row((x1, y1), (x2, y2)):
     return x1 == x2
+
     
 def same_col((x1, y1), (x2, y2)):
     return y1 == y2
 
+
 def same_diag((x1, y1), (x2, y2)):
     return abs(x1 - x2) == abs(y1 - y2)
+
 
 def in_line((x1, y1), (x2, y2)):
     return same_col((x1, y1), (x2, y2)) or same_row((x1, y1), (x2, y2)) or same_diag((x1, y1), (x2, y2))
@@ -24,8 +35,10 @@ def opponent(letter):
     else:
         return "X"
 
+
 def inbounds(i, j, width, length):
     return i >= 0 and j >= 0 and i < width and j < length
+
 
 def two_row(b, letter): 
     if letter != "X" and letter != "O":
@@ -112,12 +125,13 @@ def third_space(x1, y1, x2, y2):
     
         
 def winning_move(b, letter):
+    opp = spaces[opponent(letter)]
+    rows = all_two_rows(b, letter) 
     letter = spaces[letter]
-    rows = all_two_rows(b, "X") 
     for r in rows:  
         third = third_space(r[0][0], r[0][1], r[1][0], r[1][1])
         if third != None:
-            if b[third[0]][third[1]] == letter or b[third[0]][third[1]] == 0:
+            if b[third[0]][third[1]] != opp:
                 return third
 
     return None
@@ -129,36 +143,122 @@ def all_winning_moves(b, letter):
     for r in rows:  
         third = third_space(r[0][0], r[0][1], r[1][0], r[1][1])
         if third != None:
-            if b[third[0]][third[1]] == letter or b[third[0]][third[1]] == 0:
+            if b[third[0]][third[1]] != spaces[opponent(letter)]:
                 a.append(third)
 
     return a
+
+# 1 indicates to continue, 0 indicates that we are done
+def move(b, letter):
+    if win(b, letter) == None:
+        if block(b, letter) == None and fork(b, letter) == None and block_fork(b, letter) == None and center(b, letter) == None and opposite_corner(letter, b) == None and empty_corner(letter, b) == None:
+            return 1
+        return 1
+    return 0 
 
 # Win, if possible
 def win(b, letter):
     space = winning_move(b, letter)
     if space != None:
         print letter + " plays at " + str(space) + ". " + letter + " wins."
-        b[space[0]][space[1]] = spaces[letter] 
+        b[space[0]][space[1]] = spaces[letter]
         print_board(b)
-        return True
+        return space 
     
-    return False
-    
+    return None 
+   
+def can_move(b, letter, (x, y)):
+    return b[x][y] != spaces[opponent(letter)]
 
 # Block some space that your opponent could win by occupying
-def block(b, letter):
+def block(b, letter, debug=True):
     space = winning_move(b, opponent(letter))
-    if space != None:
+    if space != None and can_move(b, letter, space):
         b[space[0]][space[1]] = spaces[letter] 
-        print letter + " plays at " + str(space) + " (Block)"
-        print_board(b)
-        return True
+        if debug:
+            print letter + " plays at " + str(space) + " (Block)"
+            print_board(b)
+        return space 
     
-    return False
+    return None 
+
+def center(b, letter, debug=True):
+    if empty_board(b):
+        return empty_corner(b, letter, debug)
+    if can_move(b, letter, (1, 1)):
+        b[1][1] = spaces[letter]
+        if debug:
+            print letter + " plays at " + str((1, 1)) + " (Center)"
+            print_board(b)
+        return (1, 1)
+
+    return None
+
+def opposite_corner(b, letter, debug=True):
+    for corner in [(0, 0), (0, 2), (2, 0), (2, 2)]:
+        opposite = (abs(2 - corner[0]), abs(2 - corner[1]))
+        if (b[corner[0]][corner[1]] == spaces[opponent(letter)]) and can_move(opposite):
+            b[opposite[0]][opposite[1]] = spaces[letter]
+            if debug:
+                print letter + " plays at " + str(opposite) + " (Opposite Corner)"
+                print_board(b)
+            return opposite
+
+    return None 
+
+def empty_corner(b, letter, debug=True):
+    for corner in [(0, 0), (0, 2), (2, 0), (2, 2)]:
+        if can_move(b, letter, corner):
+            b[corner[0]][corner[1]] = spaces[letter]
+            if debug:
+                print letter + " plays at " + str(corner) + " (Corner)"
+                print_board(b)
+            return corner  
+    return None
+            
+             
+
+def block_fork(b, letter, debug=True):
+    prev_num_twos = num_two_rows(b, letter)
+    
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if b[i][j] == spaces["blank"]:
+                b_copy = copy_board(b)
+                b_copy[i][j] = spaces[letter]
+                new_num_twos = num_two_rows(b_copy, letter)
+                diff_num_twos = new_num_twos - prev_num_twos 
+    
+                if diff_num_twos == 1:
+    
+                    # Check that this move does not force the opponent to create a fork
+                    num_twos = num_two_rows(b_copy, opponent(letter)) 
+                    winner = winning_move(b_copy, letter)
+                    if winner != None:
+                        b_copy[winner[0]][winner[1]] = spaces[opponent(letter)]
+                        if num_two_rows(b_copy, opponent(letter)) >= num_twos + 2:
+                            continue
+                        else:
+                            b[i][j] = spaces[letter]
+                            if debug:
+                                print letter + " plays at " + str((i, j)) + " (Block Fork)"
+                                print_board(b)
+                            return (i, j)
+                    
+                    
+    b_copy = copy_board(b)
+    space = fork(b_copy, opponent(letter), False) 
+    if space != None: 
+        b[space[0]][space[1]] = letter
+   
+    return space 
+    
 
 def copy_board(b):
-    new_b = [[0,0,0],[0,0,0],[0,0,0]]
+    new_b = [[0,0,0],
+             [0,0,0],
+             [0,0,0]]
+
     for i in range(0, 3):
         for j in range(0, 3):
             new_b[i][j] = b[i][j]
@@ -182,7 +282,7 @@ def print_board(b):
     print "\n"
 
 
-def fork(b, letter):
+def fork(b, letter, debug=True):
     prev_num_twos = num_two_rows(b, letter)
     
     for i in range(0, 3):
@@ -196,10 +296,11 @@ def fork(b, letter):
                 if diff_num_twos >= 2:
                     
                     b[i][j] = spaces[letter]
-                    print letter + " plays at " + str((i, j)) + " (Fork)"
-                    print_board(b)
+                    if debug:
+                        print letter + " plays at " + str((i, j)) + " (Fork)"
+                        print_board(b)
                     
-                    return True
+                    return (i, j) 
     
-    return False
+    return None 
                  
