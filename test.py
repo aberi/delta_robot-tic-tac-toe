@@ -1,5 +1,6 @@
 import board
 import numpy as np
+import argparse
 
 def test_two_row(b):
     row = board.two_row(b, "X") 
@@ -54,7 +55,20 @@ def play(b, letter):
     
 
 if __name__ == "__main__":
-    boards = [[[0, 0, 1], [0, 2, 0], [1, 0, 0]], [[1, 1, 2], [0, 2, 0], [0,  0, 0]], [[1, 2, 1],[0, 0, 0], [2, 0, 0]]]
-    letters = ["O", "X", "X"]
+    ap = argparse.ArgumentParser() 
+    ap.add_argument("-b", "--board", required=False, help="Board that the user would like to input, represented as a stringof 9 numbers: 0 for a blank space, 1 for an \'X\', and 2 for an \'O\'. An X or O must follow the 9 digits (also separated by a single space)")
     
-    play_boards(boards, letters)
+    args = vars(ap.parse_args())
+    
+    print "Board that was input: " + str(args["board"])
+    (b, letter) = board.string_to_board(str(args["board"]))
+   
+    board.move(b, letter) 
+    
+    print "Last space modified: " + str(board.last()) 
+    # play(b, letter) 
+    
+    # boards = [[[0, 0, 1], [0, 2, 0], [1, 0, 0]], [[1, 1, 2], [0, 2, 0], [0,  0, 0]], [[1, 2, 1],[0, 0, 0], [2, 0, 0]]]
+    # letters = ["O", "X", "X"]
+    # 
+    # play_boards(boards, letters)
